@@ -1,6 +1,7 @@
 #include "battery.h"
 #include <libnotify/notify.h>
 #include <unistd.h>
+#include <stdio.h>
 
 void noti(char *c) {
    NotifyNotification *m = notify_notification_new("Charge", c, NULL);
@@ -11,15 +12,19 @@ void noti(char *c) {
 int main() {
 
     notify_init("battery_app");
-    int b, low_notify = 0,high_notify = 0;
+    int percentage;
+    _Bool low_battery_notify = 0,high_battery_notify = 0;
     while (1) {
-    b = get_percentage();
-    if (b == -1){ notify_uninit(); return -1; }
+    printf("Program is running...");
+    percentage = get_percentage();
+    if (percentage == -1){ notify_uninit(); fprintf(stderr,"Failed to retrive Percentage"); return -1; }
 
-    if (b >= 76 && !high_notify) { noti("battery charged"); high_notify = 1; }
-    else if (b <= 30 && !low_notify) { noti("battery too low"); low_notify = 1; }
-    if (b < 75) high_notify = 0;
-    if (b > 30) low_notify = 0;
+    if (percentage >= 76 && !high_battery_notify) { noti("battery charged");high_battery_notify = 1; }
+
+    if (percentage <= 30 && !low_battery_notify ) { noti("battery too low"); low_battery_notify  = 1; }
+
+    if (percentage < 75) high_battery_notify = 0;
+    if (percentage > 29) low_battery_notify = 0;
     sleep(280);
     }
     notify_uninit();
