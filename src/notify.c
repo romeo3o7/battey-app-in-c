@@ -1,30 +1,51 @@
-#include <libnotify/notify.h>
+#include <systemd/sd-bus.h>
 #include <stdio.h>
+#include <string.h>
+int send_notification(const char *summary, const char *body) {
+    sd_bus *bus = NULL;
+    sd_bus_message *msg = NULL;
+    int r;
 
-int notifyInit() {
-    if (!notify_init("battery_app")) {
-        fprintf(stderr,"failed to init the application\n");
-        return -1;
-    }
-    return 0;
-}
+    r = sd_bus_open_user(&bus);
+    if (r < 0) goto finish;
 
-int sendMessage(const char *c) {
-    NotifyNotification *m = notify_notification_new("Charge", c, NULL);
+    r = sd_bus_message_new_method_call(
+        bus, &msg,
+        "org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications",
+        "Notify"
+    );
+    if (r < 0) goto finish;
 
-    if (m == NULL) {
-        fprintf(stderr, "failed to create notification object\n");
-        return -1;
-    }
-    if (!notify_notification_show(m, NULL)) {
-        fprintf(stderr, "failed to send notification object\n");
-        g_object_unref(G_OBJECT(m));
-        return -1;
-    }
-    g_object_unref(G_OBJECT(m));
-    return 0;
-}
+    r = sd_bus_message_append(msg, "susss",
+        "my-app", 0, "", summary, body);
+    if (r < 0) goto finish;
 
-void notifyUninit() {
-    notify_uninit();
+    r = sd_bus_message_open_container(msg, 'a', "s"); /* actions */
+    if (r < 0) goto finish;
+    r = sd_bus_message_close_container(msg);
+    if (r < 0) goto finish;
+
+    r = sd_bus_message_open_container(msg, 'a', "{sv}"); /* hints */
+    if (r < 0) goto finish;
+    r = sd_bus_message_close_container(msg);
+    if (r < 0) goto finish;
+
+    r = sd_bus_message_append(msg, "i", -1); /* expire_timeout */
+    if (r < 0) goto finish;
+
+    r = sd_bus_message_set_expect_reply(msg, 0);
+    if (r < 0) goto finish;
+
+    r = sd_bus_send(bus, msg, NULL);
+    if (r < 0) goto finish;
+
+    sd_bus_flush(bus);
+
+finish:
+    if (r < 0) fprintf(stderr, "send_notification: %s\n", strerror(-r));
+    sd_bus_message_unref(msg);
+    sd_bus_unref(bus);
+    return r;
 }
