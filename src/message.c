@@ -4,11 +4,11 @@ int logic(battery *state) {
     // 1 = charging
     // 2 = discharging
     if (state->per >= 78 && !state->hpn && state->isCharging == 1) {
-        if (send_notification("Battery" , "quick the battery is about to explode! unplug") < 0 ) return -1;
+        if (send_notification("Battery" , "quick i'm about to explode! unplug") < 0 ) return -1;
         state->hpn = true;
     }
     if (state->per <= 25 && !state->lpn && state->isCharging == 2) {
-        if (send_notification("Battery" , "battery is thrisry") < 0 ) return -1;
+        if (send_notification("Battery" , "i'm thrisry, please Charge me") < 0 ) return -1;
         state->lpn = true;
     }
 
