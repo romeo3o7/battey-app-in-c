@@ -38,17 +38,16 @@ int parsing(sd_bus_message *m, void *userdata, sd_bus_error *error) {
             sd_bus_message_exit_container(m);  // exit variant
             triggerCheck = true;
             goto next;
-        } 
+        }
         if (strcmp(key, "State") == 0) {
-
             sd_bus_message_enter_container(m,SD_BUS_TYPE_VARIANT, "u");
             sd_bus_message_read(m, "u", &state->isCharging);
             sd_bus_message_exit_container(m);
             goto next;
-        } 
+        }
 
         sd_bus_message_skip(m, "v");  // skip unneeded variant
-        
+
         next:
         sd_bus_message_exit_container(m);  // exit the current {sv} dictonary entry
     }

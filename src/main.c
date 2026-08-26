@@ -6,9 +6,9 @@ int main() {
     sd_event *event = NULL;
     if ( sd_event_default(&event) < 0) {// creates a event object
         sd_bus_unref(bus);
-        return 1; 
+        return 1;
     }
-    if ( sd_bus_attach_event(bus,event,0) < 0) goto cleanup; // attack the bus to the event 
+    if ( sd_bus_attach_event(bus,event,0) < 0) goto cleanup; // attack the bus to the event
     sd_bus_error error =   SD_BUS_ERROR_NULL;
     if ( notifyInit() < 0) goto cleanup;
 
@@ -18,7 +18,7 @@ int main() {
            .isCharging = 0,
            .per = 0.0
     };
-    // get battery state  
+    // get battery state
     if ( sd_bus_get_property_trivial(bus,
             "org.freedesktop.UPower",
             "/org/freedesktop/UPower/devices/battery_BAT1",
@@ -27,7 +27,7 @@ int main() {
             &error,
             'u',
             &state.isCharging) < 0) goto cleanup;
-    // get percentage  
+    // get percentage
     if ( sd_bus_get_property_trivial(bus,
             "org.freedesktop.UPower",
             "/org/freedesktop/UPower/devices/battery_BAT1",
@@ -38,16 +38,16 @@ int main() {
             &state.per) < 0) goto cleanup;
 
     if ( sd_bus_match_signal(bus, // regsites me for signals and runs my parsing when signal is recived
-                NULL, 
-                "org.freedesktop.UPower", 
-                "/org/freedesktop/UPower/devices/battery_BAT1", 
-                "org.freedesktop.DBus.Properties", 
+                NULL,
+                "org.freedesktop.UPower",
+                "/org/freedesktop/UPower/devices/battery_BAT1",
+                "org.freedesktop.DBus.Properties",
                 "PropertiesChanged",
                 parsing,
                 &state) < 0) goto cleanup;
 
-    sd_event_loop(event); // event loop 
-    
+    sd_event_loop(event); // event loop
+
     cleanup:
     sd_event_unref(event);
     sd_bus_unref(bus);
