@@ -10,7 +10,6 @@ int main() {
     }
     if ( sd_bus_attach_event(bus,event,0) < 0) goto cleanup; // attack the bus to the event
     sd_bus_error error =   SD_BUS_ERROR_NULL;
-    if ( notifyInit() < 0) goto cleanup;
 
      battery state = {
            .hpn = false,
@@ -51,7 +50,6 @@ int main() {
     cleanup:
     sd_event_unref(event);
     sd_bus_unref(bus);
-    notifyUninit();
 
     return 0;
 }

@@ -2,11 +2,9 @@
 #define GLOBAL_H
 #include <stdbool.h>
 #include <systemd/sd-bus.h>
-
+int send_notification(const char *summary, const char *body);
 
 #ifdef BUS
-int notifyInit();
-void notifyUninit();
 int parsing(sd_bus_message *m, void *userdata, sd_bus_error *error);
 #endif
 
